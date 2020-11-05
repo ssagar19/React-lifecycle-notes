@@ -20,6 +20,7 @@ We’ve made a small update to the clock app. Our <Clock /> component will still
 
 Run the app. Click on the “Toggle precise mode” button and change the clock back and forth from “precise” mode a few times to see how it works.
 
+Checkpoint 2 Passed
 2.
 Everything looks okay, but the updates aren’t happening super frequently in precise mode. Even though the data changes many times a second, it’s only being updated and re-rendered once a second. Can we do better?
 
@@ -27,6 +28,7 @@ We’d like the clock to update more frequently in precise mode. Instead of upda
 
 Create a new empty method, componentDidUpdate(). It should take one argument, prevProps, which will be the props this component had the last time it was rendered. We’ll fill it in next.
 
+Checkpoint 3 Passed
 3.
 Let’s fill in componentDidUpdate() with three high-level steps:
 
@@ -44,6 +46,7 @@ We’ll fill in step 3 next.
 
 Play around with the solution and notice that changing to/from “precise mode” completely stops the interval, effectively freezing the clock. We’ll fix that.
 
+Checkpoint 4 Passed
 
 Stuck? Get a hint
 4.
@@ -60,6 +63,7 @@ this.intervalID = setInterval(() => {
 }, delay);
 Once you’ve done this, try entering “precise” mode. The clock should update more frequently!
 
+Checkpoint 5 Passed
 
 Stuck? Get a hint
 5.
@@ -76,3 +80,47 @@ Create a new method, startInterval(), which will include all of the code for set
 Finally, remove the call to setInterval() from componentDidMount() and replace it with a call to this.startInterval(), so that both methods use the same code path.
 
 See that everything works as before, but with the bug fixed!
+
+
+////////////////////////////////////////////////////////////////////////////////
+import React from 'react';
+
+export class Clock extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { date: new Date() };
+  }
+  render() {
+    return (
+      <div>
+        {this.props.isPrecise
+          ? this.state.date.toISOString()
+          : this.state.date.toLocaleTimeString()}
+      </div>
+    );
+  }
+  startInterval() {
+    let delay;
+    if (this.props.isPrecise) {
+      delay = 100;
+    } else {
+      delay = 1000;
+    }
+    this.intervalID = setInterval(() => {
+      this.setState({ date: new Date() });
+    }, delay);
+  }
+  componentDidMount() {
+    this.startInterval();
+  }
+  componentDidUpdate(prevProps) {
+    if (this.props.isPrecise === prevProps.isPrecise) {
+      return;
+    }
+    clearInterval(this.intervalID);
+    this.startInterval();
+  }
+  componentWillUnmount() {
+    clearInterval(this.intervalID);
+  }
+}
